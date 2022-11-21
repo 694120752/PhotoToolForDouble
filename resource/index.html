@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>MyWeb</title>
+    </head>  
+    <body>
+        <button id="btn_upload">点击上传图片</button>
+        
+    </body>
+    <script>
+        document.getElementById('btn_upload').addEventListener('click',function(){
+            var XHR = new XMLHttpRequest();  
+            XHR.open("POST", "http://localhost:8081/upload",true);  
+            XHR.onreadystatechange = function () {  
+                if (XHR.readyState == 4 && XHR.status == 200) { 
+                    // 这里可以对返回的内容做处理  如果返回的是 string 就处理成json
+                    let result = eval('(' + XHR.response + ')');   // 将接口返回结果转化为json
+                    window.location.href = result.args;
+                    XHR = null;  // 主动释放,JS本身也会回收的  
+                }  
+            };  
+            XHR.setRequestHeader("Content-type","application/x-www-form-urlencoded");  // 设置请求头
+            // 发送请求
+            XHR.send('字段名=数据值');
+        },true);   
+    </script>
+</html>
