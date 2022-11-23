@@ -60,7 +60,7 @@ int main() {
     res = listen(socket_fd,1);
     while (1)
     {
-        cout << currentTime() << "inwhile" << endl;
+        cout << currentTime() << " inwhile" << endl;
         struct sockaddr_in client;
         int client_len = sizeof(client);
         // 返回的socket标识符
@@ -139,7 +139,30 @@ void sendIndexHtml(int conn_fd) {
 }
 
 void sendImage(int conn_fd,char *requestChar) {
+
     cout << currentTime() << "收到了请求图片的路由" << endl;
+    string requestString = string(requestChar);
+    // cout << requestString << endl;
+    int firstSlash = requestString.find_first_of("/");
+    int nameLength = requestString.find(" HTTP") - requestString.find_first_of("/") - 1;
+    string fileName = requestString.substr(firstSlash+1,nameLength);
+    cout << currentTime() << "分析好的文件名：" << fileName << endl;
+
+    struct stat filestat;
+    string realFileName;
+    string dirName = "resource/";
+    realFileName = dirName + fileName;
+    int statResult = stat(realFileName.data(),&filestat);
+    if (statResult != 0) {
+        cout << currentTime() << "本地文件(" << realFileName << ")读取出错:" << endl;
+    }
+    int fd = open(realFileName.data(),O_RDONLY);
+    int sendFileResult = sendfile(fd,conn_fd,0,&filestat.st_size,NULL,0);
+    if (sendFileResult != 0)
+    {
+        cout << currentTime() << "文件传送失败："<< sendFileResult  <<realFileName <<"--"<<fd << endl;
+    }
+    close(fd); // 关闭文件
 }
 
 void handleImage(int conn_fd,char *requestChar) {
