@@ -10,6 +10,8 @@
 #include <sys/socket.h>
 #include <sys/uio.h>
 #include <sys/stat.h>
+#include <opencv4/opencv2/opencv.hpp>
+
 
 #include <filesystem>
 #include <sys/time.h>
@@ -27,6 +29,8 @@ void sendImage(int conn_fd,char *requestChar);
 void handleImage(int conn_fd,char *requestChar);
 char * currentTime();
 
+
+extern void dealImageTempFunction();
 int main() {
     int socket_fd; // 服务端socket标识符
     int conn_fd; // 已连接的客户端socket标识符
@@ -53,7 +57,7 @@ int main() {
     // bind()函数把一个地址族中的特定地址赋给socket。例如对应AF_INET、AF_INET6就是把一个ipv4或ipv6地址和端口号组合赋给socket。
     // socket 方法只是创建了一个对象 返回了socket的标识 bind会绑定ip协议这些
     // 参考 https://zhuanlan.zhihu.com/p/365478112
-    res = bind(socket_fd,(struct sockaddr*)&sever_add,len);
+    res = ::bind(socket_fd,(struct sockaddr*)&sever_add,len);
     assert(res != -1);
 
     //listen()
@@ -139,7 +143,6 @@ void sendIndexHtml(int conn_fd) {
 }
 
 void sendImage(int conn_fd,char *requestChar) {
-
     cout << currentTime() << "收到了请求图片的路由" << endl;
     string requestString = string(requestChar);
     // cout << requestString << endl;
@@ -166,12 +169,14 @@ void sendImage(int conn_fd,char *requestChar) {
 }
 
 void handleImage(int conn_fd,char *requestChar) {
-    cout << currentTime() <<"我是upload的路由" << endl;
-
+    cout << currentTime() <<"我是处理图片的路由" << endl;
      char buf[200] = "little dai bi";//HTTP响应
     int s = send(conn_fd,buf,strlen(buf),0);//发送响应
     cout << requestChar << endl;
     cout << "没了" << endl;
+
+    // 使用Opencv 灰阶图
+    dealImageTempFunction();
 }
 
 char *currentTime() {
